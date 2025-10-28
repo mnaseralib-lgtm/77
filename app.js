@@ -1,7 +1,7 @@
 /***********************************************************
  ✅ Attendance System (Frontend) - Final Full Version
 ***********************************************************/
-const GOOGLE_SCRIPT_URL = "🔗 ضع هنا رابط Web App (ينتهي بـ /exec)";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCxO4pfYQADAzPSRbmDdY8zX3XtCOryMOZGLk25IFVyvtOfinnSWVjJ2jlnsH4rmgr/exec";
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
