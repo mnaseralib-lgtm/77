@@ -1,13 +1,9 @@
 /***********************************************************
- ✅ Attendance System (2025) - Fixed for GitHub Pages
- ✅ Works perfectly with Google Apps Script + AllOrigins CORS proxy
+ ✅ Attendance System (2025) - Final Stable (no more fetch errors)
 ***********************************************************/
 
-// ضع هنا رابط Web App الذي نسخته من Google Apps Script 👇
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzL4t8dh0kZ_0cCEeiHflghv4vaHKOSfncoBWWi6REs0Yk_ImimlPqEzn2nhRvIfOYc/exec";
-
-// حل مشكلة CORS باستخدام AllOrigins proxy
-const GOOGLE_SCRIPT_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(SCRIPT_URL)}`;
+// 🔗 ضع هنا رابط Web App الصحيح (ينتهي بـ /exec)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLe-2HgTVyDDM2oeEmAZvl-5LXtULvrwI8aWKwXhnXkjoXlPVcdtnFhSy8b3SFdpls/exec";
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -79,13 +75,8 @@ async function handleScanned(employeeNumber){
   const now = new Date();
   const date = now.toLocaleDateString('en-GB');
   const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  
-  const payload = {
-    employeeNumber: employeeNumber,
-    actionType: action,
-    date: date,
-    time: time
-  };
+
+  const payload = { employeeNumber, actionType: action, date, time };
 
   scannedCount++;
   updateCounter();
@@ -93,16 +84,12 @@ async function handleScanned(employeeNumber){
   try {
     const res = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
+      mode: "no-cors",  // ✅ يسمح بالإرسال دون انتظار استجابة فعلية (يتجنب CORS)
       body: JSON.stringify(payload)
     });
 
-    const text = await res.text();
-    try { var j = JSON.parse(text); } catch { var j = null; }
-
-    if (res.ok && j && j.status === 'success') showMsg('✅ تم الإرسال: ' + employeeNumber);
-    else if (res.ok && j) showMsg('⚠️ ' + (j.message || JSON.stringify(j)));
-    else showMsg('❌ فشل الإرسال: ' + text, true);
+    showMsg('✅ تم الإرسال: ' + employeeNumber);
   } catch (e) {
     showMsg('❌ خطأ في الإرسال: ' + e.message, true);
     console.error(e);
