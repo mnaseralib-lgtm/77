@@ -1,111 +1,292 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#1976d2"/>
-  <link rel="manifest" href="manifest.json">
-  <title>New Attend App</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام الحضور والانصراف الذكي</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: "Cairo", sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #007bff;
+      color: #fff;
+      padding: 15px 0;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    section {
+      margin: 20px auto;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #startBtn { background-color: #28a745; color: white; }
+    #stopBtn { background-color: #dc3545; color: white; }
+    #submitManual { background-color: #007bff; color: white; }
+    #getReport { background-color: #17a2b8; color: white; }
+    #downloadXLS { background-color: #ffc107; color: #000; }
+    input, select {
+      padding: 8px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 5px;
+    }
+    #preview {
+      width: 300px;
+      height: 300px;
+      margin: 10px auto;
+      border: 3px dashed #007bff;
+      border-radius: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .msg { margin-top: 10px; font-weight: bold; }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <h1 id="appTitle">New Attend App</h1>
-    <button id="menuBtn" class="icon-btn" aria-label="قائمة">☰</button>
-  </header>
 
-  <aside id="sidebar" class="sidebar hidden">
-    <nav>
-      <a href="#" id="homeLink">الرئيسية</a>
-      <a href="#" id="reportsLink">التقارير</a>
-      <a href="#" id="readmeLink">تعليمات</a>
-    </nav>
-  </aside>
+  <header>📋 نظام الحضور والانصراف الذكي</header>
 
-  <main class="container">
-    <section class="card" id="mainCard">
-      <div class="counter-row">
-        <h2>New Attend App</h2>
-        <div id="counter">المسحات: <span id="scannedCount">0</span></div>
-      </div>
-
-      <label for="actionType">نوع الحركة</label>
+  <!-- قسم التسجيل -->
+  <section id="attendanceSection">
+    <h2>📱 تسجيل الحضور / الانصراف</h2>
+    <div>
       <select id="actionType">
-        <option value="دخول">دخول</option>
-        <option value="انصراف">انصراف</option>
-        <option value="انصراف مسائى">انصراف مسائى</option>
+        <option value="حضور">🟢 حضور</option>
+        <option value="انصراف">🔴 انصراف</option>
       </select>
+    </div>
 
-      <div class="scanner">
-        <div id="preview" style="width:100%"></div>
-        <div class="camera-controls">
-          <button id="startBtn">تشغيل المسح</button>
-          <button id="stopBtn" disabled>إيقاف المسح</button>
-        </div>
-      </div>
+    <div id="preview"></div>
+    <button id="startBtn">تشغيل الكاميرا</button>
+    <button id="stopBtn" disabled>إيقاف</button>
 
-      <label for="manualInput">ادخال رقم الموظف يدوياً</label>
-      <input id="manualInput" type="text" inputmode="numeric" maxlength="14" placeholder="أدخل رقم الموظف (حتى 14 رقم)">
+    <h3>أو أدخل رقم الموظف يدويًا</h3>
+    <input type="text" id="manualInput" placeholder="رقم الموظف">
+    <button id="submitManual">تسجيل</button>
 
-      <div class="row">
-        <button id="submitManual">إرسال</button>
-      </div>
+    <p>عدد المسحات: <span id="scannedCount">0</span></p>
+    <p class="msg" id="lastMsg"></p>
+  </section>
 
-      <div id="lastMsg" class="msg"></div>
-    </section>
-
-    <section id="reportsPage" class="card hidden">
-      <h2>التقارير</h2>
-      <label for="reportType">نوع التقرير</label>
+  <!-- قسم التقارير -->
+  <section id="reportsSection">
+    <h2>📊 التقارير</h2>
+    <div>
       <select id="reportType">
-        <option value="employee">تقرير لموظف</option>
-        <option value="day">تقرير يوم</option>
+        <option value="day">تقرير يوم محدد</option>
+        <option value="employee">تقرير حسب الموظف</option>
         <option value="range">تقرير فترة زمنية</option>
       </select>
+    </div>
 
-      <div id="employeeBlock" class="report-block">
-        <label for="employeeId">رقم الموظف</label>
-        <input id="employeeId" maxlength="14" inputmode="numeric">
+    <div id="filters">
+      <div id="dayFilter">
+        <input type="date" id="dayDate">
       </div>
-
-      <div id="dayBlock" class="report-block hidden">
-        <label for="dayDate">اختر اليوم</label>
-        <input id="dayDate" type="date">
+      <div id="employeeFilter" style="display:none;">
+        <input type="text" id="employeeId" placeholder="رقم الموظف">
       </div>
-
-      <div id="rangeBlock" class="report-block hidden">
-        <label for="fromDate">من</label>
-        <input id="fromDate" type="date">
-        <label for="toDate">الى</label>
-        <input id="toDate" type="date">
+      <div id="rangeFilter" style="display:none;">
+        من: <input type="date" id="fromDate">
+        إلى: <input type="date" id="toDate">
       </div>
+    </div>
 
-      <div class="row">
-        <button id="getReport">جلب التقرير</button>
-        <button id="downloadXLS" disabled>تنزيل كـ Excel</button>
-      </div>
+    <button id="getReport">عرض التقرير</button>
+    <button id="downloadXLS" disabled>📥 تحميل CSV</button>
 
-      <div id="reportResult" class="table-wrap"></div>
-    </section>
+    <div id="reportResult"></div>
+  </section>
 
-    <section id="readmePage" class="card hidden">
-      <h2>تعليمات سريعة</h2>
-      <ol>
-        <li>أنشئ Google Sheet به ورقتين: <strong>QRData</strong> و <strong>Database</strong>.</li>
-        <li>انسخ كود <code>google_apps_script.gs</code> داخل Apps Script في الشيت، احفظ وانشر كـ Web App (Execute as: Me، Who has access: Anyone).</li>
-        <li>تأكد أن الكود في Apps Script لا يستخدم <code>.setHeader()</code> (لقد جهزناه لك).</li>
-        <li>ارفع محتويات هذا المشروع إلى GitHub وفعّل GitHub Pages (أو افتح محلياً عبر HTTP).</li>
-      </ol>
-    </section>
-
-  </main>
-
-  <script src="app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(function(){});
+    /***********************************************************
+      ✅ Attendance System (Frontend)
+    ***********************************************************/
+    const GOOGLE_SCRIPT_URL = "🔗 ضع هنا رابط Web App الذي ينتهي بـ /exec";
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const manualInput = document.getElementById('manualInput');
+    const submitManual = document.getElementById('submitManual');
+    const actionType = document.getElementById('actionType');
+    const scannedCountEl = document.getElementById('scannedCount');
+    const lastMsg = document.getElementById('lastMsg');
+    const previewElemId = 'preview';
+    const reportType = document.getElementById('reportType');
+    const employeeIdInput = document.getElementById('employeeId');
+    const dayDate = document.getElementById('dayDate');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const getReport = document.getElementById('getReport');
+    const downloadXLS = document.getElementById('downloadXLS');
+    const reportResult = document.getElementById('reportResult');
+
+    let html5QrcodeScanner = null;
+    let scanning = false;
+    let scannedCount = 0;
+
+    function updateCounter(){ scannedCountEl.textContent = scannedCount; }
+    function showMsg(text, error=false){ 
+      lastMsg.textContent = text; 
+      lastMsg.style.color = error ? 'red' : 'green'; 
+      setTimeout(()=>{ lastMsg.textContent=''; }, 4000);
     }
+
+    // =============== المسح بالكاميرا ===============
+    startBtn.addEventListener('click', function(){
+      if (scanning) return;
+      if (typeof Html5Qrcode === 'undefined') { showMsg('⚠️ مكتبة المسح غير محمّلة', true); return; }
+
+      html5QrcodeScanner = new Html5Qrcode(previewElemId);
+      html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        function(decodedText){
+          stopScanning();
+          handleScanned(decodedText);
+        }
+      ).then(()=>{
+        scanning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        showMsg('📷 الكاميرا تعمل الآن');
+      }).catch(err=>{
+        showMsg('خطأ في تشغيل الكاميرا', true);
+        console.error(err);
+      });
+    });
+
+    stopBtn.addEventListener('click', stopScanning);
+
+    function stopScanning(){
+      if (html5QrcodeScanner && scanning){
+        html5QrcodeScanner.stop().then(()=>{
+          html5QrcodeScanner.clear();
+          scanning = false;
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          showMsg('تم إيقاف الكاميرا');
+        }).catch(console.error);
+      }
+    }
+
+    function isNumericString(str){ return /^\d{1,14}$/.test(str); }
+
+    submitManual.addEventListener('click', ()=>{
+      const val = manualInput.value.trim();
+      if (!isNumericString(val)){ showMsg('أدخل رقم موظف صحيح', true); return; }
+      handleScanned(val);
+      manualInput.value = '';
+    });
+
+    async function handleScanned(employeeNumber){
+      const action = actionType.value;
+      const payload = { employeeNumber, actionType: action };
+
+      scannedCount++;
+      updateCounter();
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          mode: "no-cors",
+          body: JSON.stringify(payload)
+        });
+        showMsg('✅ تم تسجيل الموظف ' + employeeNumber);
+      } catch (e) {
+        showMsg('❌ خطأ في الإرسال: ' + e.message, true);
+      }
+    }
+
+    // =============== التقارير ===============
+    reportType.addEventListener('change', ()=>{
+      document.getElementById('dayFilter').style.display = 'none';
+      document.getElementById('employeeFilter').style.display = 'none';
+      document.getElementById('rangeFilter').style.display = 'none';
+
+      const t = reportType.value;
+      if (t === 'day') document.getElementById('dayFilter').style.display = 'block';
+      if (t === 'employee') document.getElementById('employeeFilter').style.display = 'block';
+      if (t === 'range') document.getElementById('rangeFilter').style.display = 'block';
+    });
+
+    getReport.addEventListener('click', async ()=>{
+      let url = GOOGLE_SCRIPT_URL + '?type=' + reportType.value;
+      if (reportType.value === 'employee') url += '&employee=' + encodeURIComponent(employeeIdInput.value.trim());
+      if (reportType.value === 'day') url += '&date=' + dayDate.value.split('-').reverse().join('/');
+      if (reportType.value === 'range') url += '&from=' + fromDate.value + '&to=' + toDate.value;
+
+      try {
+        const res = await fetch(url);
+        const j = await res.json();
+        if (j.status === 'ok') {
+          renderReportTable(j.columns, j.rows);
+          downloadXLS.disabled = false;
+          window._lastReport = j;
+          showMsg('📊 تم تحميل التقرير');
+        } else showMsg('⚠️ لا توجد بيانات', true);
+      } catch (e) {
+        showMsg('❌ خطأ في تحميل التقرير', true);
+      }
+    });
+
+    function renderReportTable(columns, rows){
+      let html = '<table><thead><tr>';
+      columns.forEach(c=> html += `<th>${c}</th>`);
+      html += '</tr></thead><tbody>';
+      rows.forEach(r=> html += `<tr>${r.map(c=>`<td>${c??''}</td>`).join('')}</tr>`);
+      html += '</tbody></table>';
+      reportResult.innerHTML = html;
+    }
+
+    downloadXLS.addEventListener('click', ()=>{
+      const rep = window._lastReport;
+      if (!rep) return;
+      const csv = [rep.columns.join(',')]
+        .concat(rep.rows.map(r=>r.map(c=>`"${(c??'').replace(/"/g,'""')}"`).join(',')))
+        .join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'report.csv';
+      a.click();
+    });
   </script>
+
 </body>
 </html>
