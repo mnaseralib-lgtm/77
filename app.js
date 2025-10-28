@@ -1,7 +1,7 @@
 /***********************************************************
  ✅ Attendance System (Frontend) - Final Full Version
 ***********************************************************/
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_u_G35CQvvIPWFU3oxVDltP2UKwEXxqiOkRM3H3tVrhLwawqJ3eFfo7AY5dinIx-8/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwALCuYvqQSE27AKpfSQROuOsojsWxaC5BQsEXr7mMnB6mEVQPBxFDo0708G0WjcGZU/exec";
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
