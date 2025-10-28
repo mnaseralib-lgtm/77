@@ -1,9 +1,7 @@
 /***********************************************************
- ✅ Attendance System (2025) - Final Stable (no more fetch errors)
+ ✅ Attendance System (Frontend) - Final Full Version
 ***********************************************************/
-
-// 🔗 ضع هنا رابط Web App الصحيح (ينتهي بـ /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwNbTvuSHHjsiGdIon2RIpKtlVsTfuTlrAQ5vJS9ir0ccwFaBPtqMu4R1kM6kE_HDE/exec";
+const GOOGLE_SCRIPT_URL = "🔗 ضع هنا رابط Web App (ينتهي بـ /exec)";
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
@@ -14,6 +12,15 @@ const scannedCountEl = document.getElementById('scannedCount');
 const lastMsg = document.getElementById('lastMsg');
 const previewElemId = 'preview';
 
+const reportType = document.getElementById('reportType');
+const employeeIdInput = document.getElementById('employeeId');
+const dayDate = document.getElementById('dayDate');
+const fromDate = document.getElementById('fromDate');
+const toDate = document.getElementById('toDate');
+const getReport = document.getElementById('getReport');
+const downloadXLS = document.getElementById('downloadXLS');
+const reportResult = document.getElementById('reportResult');
+
 let html5QrcodeScanner = null;
 let scanning = false;
 let scannedCount = 0;
@@ -22,12 +29,14 @@ function updateCounter(){ scannedCountEl.textContent = scannedCount; }
 function showMsg(text, error=false){ 
   lastMsg.textContent = text; 
   lastMsg.style.color = error ? 'red' : 'green'; 
-  setTimeout(()=>{ lastMsg.textContent=''; }, 5000);
+  setTimeout(()=>{ lastMsg.textContent=''; }, 4000);
 }
 
+// ==================== المسح ====================
 startBtn.addEventListener('click', function(){
   if (scanning) return;
-  if (typeof Html5Qrcode === 'undefined') { showMsg('📦 مكتبة المسح غير محمّلة', true); return; }
+  if (typeof Html5Qrcode === 'undefined') { showMsg('مكتبة المسح غير محمّلة', true); return; }
+
   html5QrcodeScanner = new Html5Qrcode(previewElemId);
   html5QrcodeScanner.start(
     { facingMode: "environment" },
@@ -56,7 +65,7 @@ function stopScanning(){
       scanning = false;
       startBtn.disabled = false;
       stopBtn.disabled = true;
-      showMsg('⛔ تم إيقاف المسح');
+      showMsg('تم إيقاف المسح');
     }).catch(console.error);
   }
 }
@@ -65,33 +74,70 @@ function isNumericString(str){ return /^\d{1,14}$/.test(str); }
 
 submitManual.addEventListener('click', ()=>{
   const val = manualInput.value.trim();
-  if (!isNumericString(val)){ showMsg('⚠️ أدخل رقم موظف صحيح (أرقام فقط)', true); return; }
+  if (!isNumericString(val)){ showMsg('أدخل رقم موظف صحيح (أرقام فقط)', true); return; }
   handleScanned(val);
   manualInput.value = '';
 });
 
 async function handleScanned(employeeNumber){
   const action = actionType.value;
-  const now = new Date();
-  const date = now.toLocaleDateString('en-GB');
-  const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-  const payload = { employeeNumber, actionType: action, date, time };
+  const payload = { employeeNumber, actionType: action };
 
   scannedCount++;
   updateCounter();
 
   try {
-    const res = await fetch(GOOGLE_SCRIPT_URL, {
+    await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      mode: "no-cors",  // ✅ يسمح بالإرسال دون انتظار استجابة فعلية (يتجنب CORS)
+      mode: "no-cors",
       body: JSON.stringify(payload)
     });
-
     showMsg('✅ تم الإرسال: ' + employeeNumber);
   } catch (e) {
     showMsg('❌ خطأ في الإرسال: ' + e.message, true);
-    console.error(e);
   }
 }
+
+// ==================== التقارير ====================
+getReport.addEventListener('click', async ()=>{
+  let url = GOOGLE_SCRIPT_URL + '?type=' + reportType.value;
+  if (reportType.value === 'employee') url += '&employee=' + encodeURIComponent(employeeIdInput.value.trim());
+  if (reportType.value === 'day') url += '&date=' + dayDate.value.split('-').reverse().join('/');
+  if (reportType.value === 'range') url += '&from=' + fromDate.value + '&to=' + toDate.value;
+
+  try {
+    const res = await fetch(url);
+    const j = await res.json();
+    if (j.status === 'ok') {
+      renderReportTable(j.columns, j.rows);
+      downloadXLS.disabled = false;
+      window._lastReport = j;
+      showMsg('📊 تم تحميل التقرير');
+    } else showMsg('⚠️ لا توجد بيانات', true);
+  } catch (e) {
+    showMsg('❌ خطأ في تحميل التقرير', true);
+  }
+});
+
+function renderReportTable(columns, rows){
+  let html = '<table><thead><tr>';
+  columns.forEach(c=> html += `<th>${c}</th>`);
+  html += '</tr></thead><tbody>';
+  rows.forEach(r=> html += `<tr>${r.map(c=>`<td>${c??''}</td>`).join('')}</tr>`);
+  html += '</tbody></table>';
+  reportResult.innerHTML = html;
+}
+
+downloadXLS.addEventListener('click', ()=>{
+  const rep = window._lastReport;
+  if (!rep) return;
+  const csv = [rep.columns.join(',')]
+    .concat(rep.rows.map(r=>r.map(c=>`"${(c??'').replace(/"/g,'""')}"`).join(',')))
+    .join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'report.csv';
+  a.click();
+});
