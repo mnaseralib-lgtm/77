@@ -3,7 +3,7 @@
 ***********************************************************/
 
 // 🔗 ضع هنا رابط Web App الصحيح (ينتهي بـ /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLe-2HgTVyDDM2oeEmAZvl-5LXtULvrwI8aWKwXhnXkjoXlPVcdtnFhSy8b3SFdpls/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhJNf93c-f--Wt18FZ3hANaam8Lnr6LFNUWBXWLpABhvsChlOqeHuS5vGTO2TWsleO/exec";
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
