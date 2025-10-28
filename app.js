@@ -1,6 +1,6 @@
 // app.js - Final fixed for GitHub Pages
 // Uses corsproxy.io to avoid CORS issues when hosted on GitHub Pages
-const GOOGLE_SCRIPT_URL = "https://corsproxy.io/?https://script.google.com/macros/s/AKfycbyLe-2HgTVyDDM2oeEmAZvl-5LXtULvrwI8aWKwXhnXkjoXlPVcdtnFhSy8b3SFdpls/exec"; // corsproxy wrapper + your Apps Script exec URL
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfx8zsYnH-OASpI1sgcO3epnHHZZZx322YkySAyB-hga64QGdp4_7N1y3bJeg-N4w9/exec"; // corsproxy wrapper + your Apps Script exec URL
 
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
