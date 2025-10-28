@@ -1,7 +1,7 @@
 /***********************************************************
  🟢 Attendance App Frontend (GitHub Pages)
 ***********************************************************/
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbOx5NargaKFAeu2F4noMrK1cNTmWgqYwUXPMgGJEUGdeFDuYR6jqzVGg7q1ONhyEX/exec"; // ← ضع هنا رابط الـ Web App
+const GOOGLE_SCRIPT_URL = "https://api.allorigins.win/raw?url=https://script.google.com/macros/s/AKfycbyLe-2HgTVyDDM2oeEmAZvl-5LXtULvrwI8aWKwXhnXkjoXlPVcdtnFhSy8b3SFdpls/exec";
 
 // ✅ الدالة التي تُرسل البيانات إلى Google Sheet
 async function sendAttendanceData(employeeNumber, action) {
