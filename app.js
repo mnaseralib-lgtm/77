@@ -4,7 +4,7 @@
 ***********************************************************/
 
 // ضع هنا رابط Web App الذي نسخته من Google Apps Script 👇
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLe-2HgTVyDDM2oeEmAZvl-5LXtULvrwI8aWKwXhnXkjoXlPVcdtnFhSy8b3SFdpls/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzL4t8dh0kZ_0cCEeiHflghv4vaHKOSfncoBWWi6REs0Yk_ImimlPqEzn2nhRvIfOYc/exec";
 
 // حل مشكلة CORS باستخدام AllOrigins proxy
 const GOOGLE_SCRIPT_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(SCRIPT_URL)}`;
